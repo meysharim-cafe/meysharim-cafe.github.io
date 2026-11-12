@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ניהול · קפה מישרים</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#2b2118">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f3ee; --card:#fff; --ink:#2b2118; --muted:#7a6a5c; --line:#eadfd2;
+    --brand:#f28c28; --brand-dark:#b85f0c; --soft:#fff1e0;
+    --ok:#2e9e5b; --ok-soft:#e6f6ec; --no:#d9443a; --no-soft:#fde8e6; --dark:#2b2118;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:"Rubik",system-ui,Arial,sans-serif; font-size:16px}
+  [hidden]{display:none!important}
+  button,input,select{font:inherit; color:inherit}
+  .num{font-variant-numeric:tabular-nums}
+
+  .top{background:var(--dark); color:#fff; padding:calc(10px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left))}
+  .top .in{max-width:1100px; margin:0 auto}
+  .brand{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap}
+  .brand b{font-size:1.15rem}
+  .tools{display:flex; gap:6px}
+  .ibtn{background:rgba(255,255,255,.12); border:0; border-radius:10px; padding:8px 12px; cursor:pointer; color:#fff}
+  .ibtn:hover{background:rgba(255,255,255,.2)}
+  .tabs{display:flex; gap:4px; margin-top:10px; overflow-x:auto}
+  .tab{background:none; border:0; color:#d8cbbd; padding:10px 14px; border-radius:10px 10px 0 0; cursor:pointer; white-space:nowrap; font-weight:500}
+  .tab.on{background:var(--bg); color:var(--ink)}
+  main{max-width:1100px; margin:0 auto; padding:18px max(16px, env(safe-area-inset-right)) 60px max(16px, env(safe-area-inset-left)); display:flex; flex-direction:column; gap:16px}
+  .demo{background:#3b2a1a; color:#ffd9a8; text-align:center; font-size:.85rem; padding:6px}
+
+  h2{margin:0; font-size:1.35rem}
+  h3{margin:0 0 10px; font-size:1.05rem}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; min-width:0}
+  .muted{color:var(--muted)}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .sp{flex:1}
+  .btn{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 14px; cursor:pointer; font-weight:500}
+  .btn:hover{border-color:var(--brand)}
+  .btn.primary{background:var(--brand); border-color:var(--brand); color:#fff}
+  .btn.primary:hover{background:var(--brand-dark)}
+  .btn.danger{color:var(--no)}
+  .btn.sm{padding:5px 10px; font-size:.9rem}
+  .btn:disabled{opacity:.5; cursor:default}
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #1f6feb; outline-offset:2px}
+  input[type=text],input[type=number],input[type=password],input[type=search],select{border:1px solid var(--line); border-radius:10px; padding:9px 12px; background:#fff; min-width:0}
+
+  .head{display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap}
+  .pill{display:inline-block; border-radius:999px; padding:3px 12px; font-size:.85rem; font-weight:500}
+  .pill.open{background:var(--ok-soft); color:#1d6e40}
+  .pill.closed{background:#eee; color:#555}
+
+  .kpis{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+  .kpi{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; min-width:0}
+  .kpi small{display:block; color:var(--muted)}
+  .kpi b{font-size:clamp(1.3rem,5vw,1.9rem); font-weight:700; white-space:nowrap}
+  @media (max-width:520px){ .kpi{padding:10px} .kpi small,.kpi .sub{font-size:.75rem} }
+  .kpi .sub{font-size:.85rem; color:var(--muted)}
+
+  .items{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px}
+  .it{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px; display:flex; gap:12px; align-items:center}
+  .thumb{width:58px; height:58px; border-radius:12px; background:var(--soft); display:flex; align-items:center; justify-content:center; font-size:2rem; overflow:hidden; flex:none}
+  .thumb img{width:100%; height:100%; object-fit:cover}
+  .it .n{font-weight:500}
+  .it .c{font-size:2rem; font-weight:700; line-height:1.1}
+  .it .f{font-size:.82rem; color:var(--muted)}
+
+  .two{display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px}
+  .tablewrap{overflow-x:auto}
+  table{border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums}
+  th,td{padding:8px 10px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap}
+  th{font-weight:500; color:var(--muted); font-size:.88rem}
+  tr.tot td{font-weight:700; border-top:2px solid var(--line)}
+  tr.fc td{background:var(--soft); font-weight:500}
+  tr.canceled td{color:#aaa; text-decoration:line-through}
+  tr.canceled td.act{text-decoration:none}
+  td.act{text-align:left}
+
+  .bars{display:flex; align-items:flex-end; gap:8px; height:170px; padding-top:18px}
+  .bars .b{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; min-width:0}
+  .bars .v{width:100%; max-width:44px; background:var(--brand); border-radius:6px 6px 0 0}
+  .bars .v.fc{background:repeating-linear-gradient(45deg,var(--soft),var(--soft) 5px,#ffd9ad 5px,#ffd9ad 10px); border:1px dashed var(--brand)}
+  .bars .l{font-size:.75rem; color:var(--muted); margin-top:4px}
+  .bars .t{font-size:.8rem; font-weight:500}
+
+  /* menu editor */
+  .mrow{display:grid; grid-template-columns:96px minmax(0,1fr); gap:14px; padding:14px 0; border-bottom:1px solid var(--line)}
+  .mrow:last-child{border:0}
+  .mrow .thumb{width:96px; height:96px; font-size:3rem}
+  .mf{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px 12px}
+  .mf label{display:flex; flex-direction:column; gap:3px; font-size:.85rem; color:var(--muted)}
+  .mf label input{color:var(--ink); font-size:1rem}
+  .mrow.off{opacity:.55}
+  .picbtns{display:flex; flex-direction:column; gap:6px; margin-top:6px}
+
+  .login{max-width:380px; margin:12vh auto 0; padding:0 16px}
+  .login .card{display:flex; flex-direction:column; gap:12px; padding:24px}
+  .err{background:var(--no-soft); color:#8a1f17; border-radius:10px; padding:10px 12px}
+  .okmsg{background:var(--ok-soft); color:#1d6e40; border-radius:10px; padding:10px 12px}
+  .spinner{display:inline-block; width:16px; height:16px; border:3px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; vertical-align:-3px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  @media print{
+    .top,.noprint,.tools{display:none!important}
+    body{background:#fff}
+    .card,.kpi,.it{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="demo" id="demoBar" hidden>מצב הדגמה · הנתונים לדוגמה בלבד · הסיסמה להדגמה: 1234</div>
+
+<!-- כניסה -->
+<div class="login" id="loginView">
+  <form class="card" id="loginForm">
+    <div style="font-size:2.4rem; text-align:center">☕</div>
+    <h2 style="text-align:center">ניהול בית קפה מישרים</h2>
+    <label for="pw" class="muted">סיסמת צוות</label>
+    <input type="password" id="pw" autocomplete="current-password" required>
+    <label class="row muted" style="gap:8px"><input type="checkbox" id="remember"> לזכור אותי במכשיר הזה</label>
+    <button class="btn primary" id="loginBtn">כניסה</button>
+    <div class="err" id="loginErr" hidden></div>
+  </form>
+</div>
+
+<!-- אפליקציה -->
+<div id="appView" hidden>
+  <div class="top"><div class="in">
+    <div class="brand">
+      <b>☕ ניהול · בית קפה מישרים</b>
+      <div class="tools">
+        <button class="ibtn" id="refresh" title="רענון">⟳ רענון</button>
+        <button class="ibtn" id="logout">יציאה</button>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab on" data-tab="week">יום שלישי</button>
+      <button class="tab" data-tab="history">היסטוריה ותחזית</button>
+      <button class="tab" data-tab="menu">תפריט ותמונות</button>
+    </nav>
+  </div></div>
+
+  <main>
+    <div class="err" id="dataErr" hidden></div>
+
+    <!-- טאב: יום שלישי -->
+    <section id="tab-week">
+      <div style="display:flex; flex-direction:column; gap:16px">
+        <div class="head">
+          <div>
+            <div class="row"><h2 id="weekTitle"></h2><span class="pill" id="weekPill"></span></div>
+            <div class="muted" id="weekSub"></div>
+          </div>
+          <div class="row noprint">
+            <select id="daySel" aria-label="בחירת יום"></select>
+            <button class="btn" id="csvBtn">⬇ ייצוא לאקסל</button>
+            <button class="btn" id="printBtn">🖨 הדפסה</button>
+          </div>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="items" id="itemTiles"></div>
+        <div class="two">
+          <div class="card">
+            <h3>לפי כיתה</h3>
+            <div class="tablewrap" id="byClass"></div>
+          </div>
+          <div class="card">
+            <div class="row" style="margin-bottom:10px">
+              <h3 style="margin:0">רשימת הזמנות</h3><span class="sp"></span>
+              <input type="search" id="search" placeholder="חיפוש שם או כיתה" class="noprint" style="width:170px">
+            </div>
+            <div class="tablewrap" id="orderList"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- טאב: היסטוריה ותחזית -->
+    <section id="tab-history" hidden>
+      <div style="display:flex; flex-direction:column; gap:16px">
+        <h2>היסטוריה ותחזית</h2>
+        <div class="card">
+          <h3>יחידות בכל יום שלישי</h3>
+          <div class="bars" id="bars"></div>
+        </div>
+        <div class="card">
+          <h3>פירוט לפי שבוע</h3>
+          <div class="tablewrap" id="histTable"></div>
+          <p class="muted" style="margin:10px 0 0; font-size:.88rem">
+            התחזית היא ממוצע של 4 ימי שלישי האחרונים שהיו בהם הזמנות, כשלשבוע האחרון יש משקל גבוה יותר.
+            היא משתפרת ככל שמצטברים שבועות.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- טאב: תפריט -->
+    <section id="tab-menu" hidden>
+      <div style="display:flex; flex-direction:column; gap:16px">
+        <div class="head">
+          <div><h2>תפריט ותמונות</h2><div class="muted">מה שנשמר כאן מופיע אצל התלמידים בפעם הבאה שהם פותחים את האפליקציה.</div></div>
+          <div class="row">
+            <button class="btn" id="addItem">+ מנה חדשה</button>
+            <button class="btn primary" id="saveMenu">שמירת התפריט</button>
+          </div>
+        </div>
+        <div class="okmsg" id="menuOk" hidden>התפריט נשמר ✓</div>
+        <div class="err" id="menuErr" hidden></div>
+        <div class="card" id="menuRows"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<input type="file" id="fileIn" accept="image/*" hidden>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="mock-api.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = Util.esc;
+const PWKEY = "mesharim-admin-pw";
+let PW = "";
+let DATA = null;          // { window, menu, orders }
+let selDay = null;
+let menuDraft = [];
+let menuDirty = false;
+
+/* ---------- סיסמה ---------- */
+function storedPw(){
+  try{ return sessionStorage.getItem(PWKEY) || localStorage.getItem(PWKEY) || ""; }catch(e){ return ""; }
+}
+function keepPw(pw, remember){
+  try{
+    sessionStorage.setItem(PWKEY, pw);
+    if(remember) localStorage.setItem(PWKEY, pw); else localStorage.removeItem(PWKEY);
+  }catch(e){}
+}
+function dropPw(){ try{ sessionStorage.removeItem(PWKEY); localStorage.removeItem(PWKEY); }catch(e){} }
+
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const pw = $("pw").value;
+  $("loginErr").hidden = true;
+  $("loginBtn").disabled = true; $("loginBtn").innerHTML = '<span class="spinner"></span>';
+  try{
+    await api("adminLogin", { pw });
+    PW = pw; keepPw(pw, $("remember").checked);
+    await enter();
+  }catch(err){
+    $("loginErr").textContent = err.code === "network" ? "אין חיבור לאינטרנט." : err.message;
+    $("loginErr").hidden = false;
+  }finally{
+    $("loginBtn").disabled = false; $("loginBtn").textContent = "כניסה";
+  }
+});
+
+$("logout").onclick = () => {
+  if(menuDirty && !confirmLeave()) return;
+  dropPw(); PW = ""; DATA = null;
+  $("appView").hidden = true; $("loginView").hidden = false; $("pw").value = "";
+};
+
+async function enter(){
+  $("loginView").hidden = true; $("appView").hidden = false;
+  await refresh();
+}
+
+/* ---------- נתונים ---------- */
+async function refresh(){
+  $("dataErr").hidden = true;
+  $("refresh").innerHTML = '<span class="spinner"></span>';
+  try{
+    DATA = await api("adminData", { pw: PW, weeks: 20 });
+    if(!selDay) selDay = DATA.window.day;
+    if(!menuDirty){ menuDraft = DATA.menu.map(m => ({ ...m })); }
+    renderAll();
+  }catch(err){
+    if(err.code === "bad_password"){ dropPw(); location.reload(); return; }
+    $("dataErr").textContent = err.code === "network" ? "אין חיבור לאינטרנט. מציג את הנתונים האחרונים שנטענו." : err.message;
+    $("dataErr").hidden = false;
+  }finally{
+    $("refresh").textContent = "⟳ רענון";
+  }
+}
+$("refresh").onclick = refresh;
+setInterval(() => { if(!$("appView").hidden && !$("tab-week").hidden && document.visibilityState === "visible") refresh(); }, 60000);
+
+const menuAll = () => DATA ? DATA.menu : [];
+const active = o => o.status === "active";
+const unitsOf = orders => {
+  const u = {}; orders.filter(active).forEach(o => Object.entries(o.items).forEach(([id, q]) => u[id] = (u[id] || 0) + q));
+  return u;
+};
+const sum = obj => Object.values(obj).reduce((a, b) => a + b, 0);
+const nameOf = id => (menuAll().find(m => m.id === id) || { name: id }).name;
+
+// ימי שלישי בהיסטוריה (לפני היום הקרוב) שהיו בהם הזמנות, מהחדש לישן
+function pastDays(){
+  const set = new Set(DATA.orders.filter(o => active(o) && o.day < DATA.window.day).map(o => o.day));
+  return [...set].sort().reverse();
+}
+
+function forecast(beforeDay){
+  const days = [...new Set(DATA.orders.filter(o => active(o) && o.day < beforeDay).map(o => o.day))].sort().reverse().slice(0, 4);
+  if(days.length < 2) return null;
+  const W = [4, 3, 2, 1];
+  const res = {}; let wsum = 0;
+  days.forEach((d, i) => {
+    const u = unitsOf(DATA.orders.filter(o => o.day === d));
+    menuAll().forEach(m => res[m.id] = (res[m.id] || 0) + (u[m.id] || 0) * W[i]);
+    wsum += W[i];
+  });
+  Object.keys(res).forEach(k => res[k] = Math.round(res[k] / wsum));
+  return { units: res, basedOn: days.length };
+}
+
+/* ---------- טאבים ---------- */
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
+  if(menuDirty && t.dataset.tab !== "menu" && !confirmLeave()) return;
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === t));
+  ["week", "history", "menu"].forEach(k => $("tab-" + k).hidden = k !== t.dataset.tab);
+});
+function confirmLeave(){
+  // חלון אישור מובנה בדף: נבקש שמירה במקום לאבד שינויים
+  $("menuErr").textContent = "יש שינויים בתפריט שלא נשמרו. לחצו על \"שמירת התפריט\", או על \"ביטול השינויים\".";
+  $("menuErr").innerHTML += ' <button class="btn sm" id="discard">ביטול השינויים</button>';
+  $("menuErr").hidden = false;
+  $("discard").onclick = () => { menuDirty = false; menuDraft = DATA.menu.map(m => ({ ...m })); renderMenuEditor(); $("menuErr").hidden = true; };
+  document.querySelector('.tab[data-tab="menu"]').click();
+  return false;
+}
+window.addEventListener("beforeunload", e => { if(menuDirty){ e.preventDefault(); e.returnValue = ""; } });
+
+function renderAll(){ renderWeek(); renderHistory(); renderMenuEditor(); }
+
+/* ---------- טאב יום שלישי ---------- */
+function renderWeek(){
+  const up = DATA.window.day;
+  const days = [up, ...pastDays()];
+  if(!days.includes(selDay)) selDay = up;
+  $("daySel").innerHTML = days.map(d => `<option value="${d}" ${d === selDay ? "selected" : ""}>יום שלישי ${Util.fmtDay(d)}${d === up ? " (הקרוב)" : ""}</option>`).join("");
+
+  const isUp = selDay === up;
+  const orders = DATA.orders.filter(o => o.day === selDay);
+  const act = orders.filter(active);
+  const units = unitsOf(orders);
+  const totalUnits = sum(units);
+  const revenue = act.reduce((s, o) => s + o.total, 0);
+  const fc = isUp ? forecast(up) : null;
+  const fcTotal = fc ? sum(fc.units) : null;
+
+  $("weekTitle").textContent = "יום שלישי " + Util.fmtDay(selDay);
+  $("weekPill").className = "pill " + (isUp ? "open" : "closed");
+  $("weekPill").textContent = isUp ? "ההזמנות פתוחות" : "הסתיים";
+  $("weekSub").textContent = isUp ? "אפשר להזמין עד יום שלישי ב-8:00 בבוקר" : "";
+
+  $("kpis").innerHTML = `
+    <div class="kpi"><small>הזמנות</small><b class="num">${act.length}</b><div class="sub">${orders.length - act.length ? (orders.length - act.length) + " בוטלו" : "&nbsp;"}</div></div>
+    <div class="kpi"><small>יחידות סה״כ</small><b class="num">${totalUnits}</b><div class="sub">${fcTotal != null ? "תחזית: ~" + fcTotal : "&nbsp;"}</div></div>
+    <div class="kpi"><small>הכנסה צפויה (מזומן)</small><b class="num">${revenue} ₪</b><div class="sub">&nbsp;</div></div>`;
+
+  const shown = menuAll().filter(m => m.active || units[m.id]);
+  $("itemTiles").innerHTML = shown.map(m => `
+    <div class="it">
+      <div class="thumb">${m.image ? `<img src="${esc(m.image)}" alt="">` : esc(m.emoji)}</div>
+      <div><div class="n">${esc(m.name)}</div><div class="c num">${units[m.id] || 0}</div>
+      <div class="f">${fc ? "תחזית: ~" + (fc.units[m.id] || 0) : "&nbsp;"}</div></div>
+    </div>`).join("");
+
+  // לפי כיתה
+  const classes = {};
+  act.forEach(o => { const c = classes[o.klass] = classes[o.klass] || {}; Object.entries(o.items).forEach(([id, q]) => c[id] = (c[id] || 0) + q); });
+  const keys = Object.keys(classes).sort((a, b) => a.localeCompare(b, "he"));
+  $("byClass").innerHTML = keys.length ? `<table>
+    <tr><th>כיתה</th>${shown.map(m => `<th>${esc(m.name)}</th>`).join("")}<th>סה״כ</th></tr>
+    ${keys.map(k => `<tr><td>${esc(k)}</td>${shown.map(m => `<td>${classes[k][m.id] || ""}</td>`).join("")}<td><b>${sum(classes[k])}</b></td></tr>`).join("")}
+    <tr class="tot"><td>סה״כ</td>${shown.map(m => `<td>${units[m.id] || 0}</td>`).join("")}<td>${totalUnits}</td></tr>
+  </table>` : `<p class="muted">עדיין אין הזמנות ליום הזה.</p>`;
+
+  renderOrders();
+}
+
+function renderOrders(){
+  const q = $("search").value.trim();
+  const isUp = selDay === DATA.window.day;
+  let orders = DATA.orders.filter(o => o.day === selDay);
+  if(q) orders = orders.filter(o => o.name.includes(q) || o.klass.includes(q));
+  orders.sort((a, b) => (b.status === "active") - (a.status === "active") || a.klass.localeCompare(b.klass, "he") || a.name.localeCompare(b.name, "he"));
+  $("orderList").innerHTML = orders.length ? `<table>
+    <tr><th>שם</th><th>כיתה</th><th>הזמנה</th><th>₪</th><th class="noprint">נשלח</th><th class="noprint"></th></tr>
+    ${orders.map(o => `<tr class="${active(o) ? "" : "canceled"}" data-id="${esc(o.id)}">
+      <td>${esc(o.name)}</td><td>${esc(o.klass)}</td>
+      <td style="white-space:normal">${esc(Util.itemsText(o.items, menuAll()))}</td><td>${o.total}</td>
+      <td class="muted noprint">${Util.fmtTime(o.created)}</td>
+      <td class="act noprint">${isUp ? (active(o)
+        ? `<button class="btn sm danger" data-ask>ביטול</button><span data-sure hidden><button class="btn sm danger" data-do="canceled">לבטל?</button> <button class="btn sm" data-no>לא</button></span>`
+        : `<button class="btn sm" data-do="active">שחזור</button>`) : ""}</td>
+    </tr>`).join("")}
+  </table>` : `<p class="muted">${q ? "לא נמצאו הזמנות." : "עדיין אין הזמנות ליום הזה."}</p>`;
+}
+
+$("search").addEventListener("input", renderOrders);
+$("daySel").addEventListener("change", e => { selDay = e.target.value; renderWeek(); });
+$("printBtn").onclick = () => window.print();
+
+$("orderList").addEventListener("click", async e => {
+  const tr = e.target.closest("tr[data-id]"); if(!tr) return;
+  if(e.target.closest("[data-ask]")){ e.target.closest("[data-ask]").hidden = true; tr.querySelector("[data-sure]").hidden = false; return; }
+  if(e.target.closest("[data-no]")){ tr.querySelector("[data-ask]").hidden = false; tr.querySelector("[data-sure]").hidden = true; return; }
+  const btn = e.target.closest("[data-do]"); if(!btn) return;
+  btn.disabled = true;
+  try{
+    await api("adminSetStatus", { pw: PW, id: tr.dataset.id, status: btn.dataset.do });
+    const o = DATA.orders.find(x => x.id === tr.dataset.id); if(o) o.status = btn.dataset.do;
+    renderWeek(); renderHistory();
+  }catch(err){
+    btn.disabled = false;
+    $("dataErr").textContent = err.message; $("dataErr").hidden = false;
+  }
+});
+
+$("csvBtn").onclick = () => {
+  const menu = menuAll();
+  const orders = DATA.orders.filter(o => o.day === selDay);
+  const head = ["שם", "כיתה", ...menu.map(m => m.name), "סה\"כ ₪", "סטטוס", "נשלח"];
+  const rows = orders.map(o => [o.name, o.klass, ...menu.map(m => o.items[m.id] || ""), o.total, active(o) ? "פעילה" : "בוטלה", Util.fmtTime(o.created)]);
+  const cell = v => { let s = String(v ?? ""); if(/^[=+\-@]/.test(s)) s = "'" + s; return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const csv = "﻿" + [head, ...rows].map(r => r.map(cell).join(",")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = `הזמנות-${selDay}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+};
+
+/* ---------- טאב היסטוריה ---------- */
+function renderHistory(){
+  const menu = menuAll().filter(m => m.active || DATA.orders.some(o => o.items[m.id]));
+  const days = pastDays().slice(0, 12);
+  const up = DATA.window.day;
+  const fc = forecast(up);
+  const upUnits = unitsOf(DATA.orders.filter(o => o.day === up));
+
+  const rows = days.map(d => {
+    const os = DATA.orders.filter(o => o.day === d && active(o));
+    const u = unitsOf(os);
+    return { d, n: os.length, u, total: sum(u), rev: os.reduce((s, o) => s + o.total, 0) };
+  });
+
+  $("histTable").innerHTML = `<table>
+    <tr><th>יום שלישי</th><th>הזמנות</th>${menu.map(m => `<th>${esc(m.name)}</th>`).join("")}<th>יחידות</th><th>הכנסה</th></tr>
+    <tr class="fc"><td>${Util.fmtDay(up)} · תחזית</td><td></td>${menu.map(m => `<td>${fc ? "~" + (fc.units[m.id] || 0) : "–"}</td>`).join("")}<td>${fc ? "~" + sum(fc.units) : "–"}</td><td></td></tr>
+    <tr class="fc"><td>${Util.fmtDay(up)} · הוזמן עד עכשיו</td><td>${DATA.orders.filter(o => o.day === up && active(o)).length}</td>${menu.map(m => `<td>${upUnits[m.id] || 0}</td>`).join("")}<td>${sum(upUnits)}</td><td></td></tr>
+    ${rows.map(r => `<tr><td>${Util.fmtDay(r.d)}</td><td>${r.n}</td>${menu.map(m => `<td>${r.u[m.id] || 0}</td>`).join("")}<td><b>${r.total}</b></td><td>${r.rev} ₪</td></tr>`).join("")}
+  </table>${days.length < 2 ? `<p class="muted">התחזית תופיע אחרי שיהיו לפחות שני ימי שלישי עם הזמנות.</p>` : ""}`;
+
+  const chart = rows.slice().reverse().map(r => ({ l: Util.fmtDay(r.d), v: r.total, fc: false }));
+  if(fc) chart.push({ l: Util.fmtDay(up) + " תחזית", v: sum(fc.units), fc: true });
+  const max = Math.max(1, ...chart.map(c => c.v));
+  $("bars").innerHTML = chart.length ? chart.map(c => `
+    <div class="b"><div class="t num">${c.fc ? "~" : ""}${c.v}</div>
+    <div class="v ${c.fc ? "fc" : ""}" style="height:${Math.max(3, Math.round(c.v / max * 120))}px"></div>
+    <div class="l">${c.l}</div></div>`).join("") : `<p class="muted">עדיין אין היסטוריה.</p>`;
+}
+
+/* ---------- טאב תפריט ---------- */
+function renderMenuEditor(){
+  $("menuRows").innerHTML = menuDraft.map((m, i) => `
+    <div class="mrow ${m.active ? "" : "off"}" data-i="${i}">
+      <div>
+        <div class="thumb">${m.image ? `<img src="${esc(m.image)}" alt="">` : esc(m.emoji)}</div>
+        <div class="picbtns">
+          <button class="btn sm" data-pic>📷 תמונה</button>
+          ${m.image ? `<button class="btn sm danger" data-nopic>הסרת תמונה</button>` : ""}
+        </div>
+      </div>
+      <div class="mf">
+        <label>שם המנה<input type="text" id="m-name-${i}" data-f="name" value="${esc(m.name)}" maxlength="30"></label>
+        <label>מחיר (₪)<input type="number" id="m-price-${i}" data-f="price" value="${Number(m.price)}" min="0" step="0.5" inputmode="decimal"></label>
+        <label>אימוג׳י (אם אין תמונה)<input type="text" id="m-emoji-${i}" data-f="emoji" value="${esc(m.emoji)}" maxlength="4"></label>
+        <label>הערה לתלמידים<input type="text" id="m-note-${i}" data-f="note" value="${esc(m.note || "")}" maxlength="60" placeholder="לא חובה"></label>
+        <label style="flex-direction:row; align-items:center; gap:8px; color:var(--ink)"><input type="checkbox" id="m-active-${i}" data-f="active" ${m.active ? "checked" : ""}> מוצג לתלמידים</label>
+      </div>
+    </div>`).join("");
+}
+
+function dirty(){ menuDirty = true; $("menuOk").hidden = true; }
+
+$("menuRows").addEventListener("input", e => {
+  const row = e.target.closest(".mrow"); const f = e.target.dataset.f; if(!row || !f) return;
+  const m = menuDraft[row.dataset.i];
+  m[f] = f === "active" ? e.target.checked : f === "price" ? Number(e.target.value) : e.target.value;
+  if(f === "active") row.classList.toggle("off", !m.active);
+  if(f === "emoji" && !m.image) row.querySelector(".thumb").textContent = m.emoji;
+  dirty();
+});
+
+let picFor = null;
+$("menuRows").addEventListener("click", e => {
+  const row = e.target.closest(".mrow"); if(!row) return;
+  if(e.target.closest("[data-pic]")){ picFor = Number(row.dataset.i); $("fileIn").value = ""; $("fileIn").click(); }
+  if(e.target.closest("[data-nopic]")){ menuDraft[row.dataset.i].image = ""; dirty(); renderMenuEditor(); }
+});
+
+$("fileIn").addEventListener("change", async () => {
+  const f = $("fileIn").files[0]; if(!f || picFor == null) return;
+  try{
+    menuDraft[picFor].image = await squareJpeg(f);
+    dirty(); renderMenuEditor();
+  }catch(err){
+    $("menuErr").textContent = "לא הצלחנו לקרוא את התמונה. נסו קובץ JPG או PNG."; $("menuErr").hidden = false;
+  }
+});
+
+// מקטין לריבוע קטן כדי שיישמר בתא אחד בגיליון (עד כ-45 אלף תווים)
+function squareJpeg(file){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(img.width, img.height);
+      for(const size of [360, 300, 240, 200]){
+        const c = document.createElement("canvas"); c.width = c.height = size;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+        for(let q = 0.8; q >= 0.4; q -= 0.1){
+          const url = c.toDataURL("image/jpeg", q);
+          if(url.length < 45000){ URL.revokeObjectURL(img.src); return resolve(url); }
+        }
+      }
+      reject(new Error("too big"));
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+$("addItem").onclick = () => {
+  menuDraft.push({ id: "item" + Date.now().toString(36), name: "מנה חדשה", price: 5, emoji: "🍽️", note: "", image: "", active: true });
+  dirty(); renderMenuEditor();
+  const i = menuDraft.length - 1; $("m-name-" + i).focus(); $("m-name-" + i).select();
+};
+
+$("saveMenu").onclick = async () => {
+  $("menuErr").hidden = true; $("menuOk").hidden = true;
+  const bad = menuDraft.find(m => !String(m.name).trim() || !(Number(m.price) >= 0));
+  if(bad){ $("menuErr").textContent = "לכל מנה צריך שם ומחיר."; $("menuErr").hidden = false; return; }
+  const btn = $("saveMenu"); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> שומר...';
+  try{
+    await api("adminSaveMenu", { pw: PW, items: menuDraft });
+    menuDirty = false; DATA.menu = menuDraft.map(m => ({ ...m }));
+    $("menuOk").hidden = false; renderWeek(); renderHistory();
+  }catch(err){
+    $("menuErr").textContent = err.code === "network" ? "אין חיבור לאינטרנט. השינויים לא נשמרו." : err.message;
+    $("menuErr").hidden = false;
+  }finally{
+    btn.disabled = false; btn.textContent = "שמירת התפריט";
+  }
+};
+
+/* ---------- התחלה ---------- */
+$("demoBar").hidden = !DEMO;
+PW = storedPw();
+if(PW) enter().catch(() => {});
+</script>
+</body>
+</html>

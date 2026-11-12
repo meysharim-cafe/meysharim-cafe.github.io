@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>בית קפה מישרים</title>
+<meta name="theme-color" content="#f28c28">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="קפה מישרים">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fff8ef; --card:#ffffff; --ink:#2b2118; --muted:#7a6a5c;
+    --brand:#f28c28; --brand-dark:#c96a10; --ok:#2e9e5b; --ok-dark:#1f7442; --no:#d9443a;
+    --line:#f0e1cf; --soft:#fff3e2;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Rubik",system-ui,Arial,sans-serif; font-size:20px}
+  body{min-height:100vh; padding-bottom:150px}
+  [hidden]{display:none!important}
+  header{background:var(--brand); color:#fff; text-align:center;
+    padding:calc(14px + env(safe-area-inset-top)) 16px 14px;
+    border-radius:0 0 28px 28px; box-shadow:0 4px 0 var(--brand-dark)}
+  header h1{margin:0; font-size:1.55rem; font-weight:800}
+  .when{display:inline-block; margin-top:8px; background:#fff; color:var(--brand-dark);
+    border-radius:999px; padding:6px 16px; font-size:1rem; font-weight:600}
+  .demo{background:#3b2a1a; color:#ffd9a8; text-align:center; font-size:.8rem; padding:6px}
+  main{max-width:640px; margin:0 auto; padding:16px}
+  .screen{display:none} .screen.on{display:block}
+  h2{font-size:1.4rem; text-align:center; margin:18px 0 14px}
+
+  .big-input{width:100%; font:inherit; font-size:1.4rem; padding:16px; border-radius:18px;
+    border:3px solid var(--line); background:#fff; text-align:center; color:var(--ink)}
+  .big-input:focus{outline:none; border-color:var(--brand)}
+  .big-input.bad{border-color:var(--no); animation:shake .3s}
+  @keyframes shake{25%{transform:translateX(6px)}75%{transform:translateX(-6px)}}
+  label.lbl{display:block; font-weight:600; margin:16px 4px 8px; font-size:1.1rem}
+
+  .btn{display:block; width:100%; font:inherit; font-size:1.35rem; font-weight:800; border:0;
+    border-radius:20px; padding:18px; cursor:pointer; color:#fff; background:var(--brand);
+    box-shadow:0 5px 0 var(--brand-dark); margin-top:20px}
+  .btn:active{transform:translateY(3px); box-shadow:0 2px 0 var(--brand-dark)}
+  .btn.ok{background:var(--ok); box-shadow:0 5px 0 var(--ok-dark)}
+  .btn.ghost{background:#fff; color:var(--ink); box-shadow:0 5px 0 var(--line); border:3px solid var(--line)}
+  .btn.danger{background:var(--no); box-shadow:0 5px 0 #a3302a}
+  .btn:disabled{background:#cfc4b8; box-shadow:0 5px 0 #b3a799; cursor:default}
+  .btn.small{font-size:1rem; padding:12px; margin-top:10px; border-radius:14px}
+  .btn:focus-visible,.qbtn:focus-visible,.pic:focus-visible{outline:4px solid #1f6feb; outline-offset:3px}
+
+  /* menu */
+  .grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+  .item{background:var(--card); border-radius:24px; border:4px solid var(--line); min-width:0;
+    padding:10px 8px 12px; text-align:center; transition:border-color .15s, background .15s}
+  .item.picked{border-color:var(--ok); background:#effaf3}
+  .pic{width:100%; aspect-ratio:1/1; border:0; border-radius:18px; background:var(--soft);
+    display:flex; align-items:center; justify-content:center; font-size:5rem; cursor:pointer;
+    padding:0; overflow:hidden; position:relative}
+  .pic img{width:100%; height:100%; object-fit:cover}
+  .badge{position:absolute; top:8px; left:8px; background:var(--ok); color:#fff; font-size:1.3rem;
+    font-weight:800; min-width:42px; height:42px; border-radius:21px; line-height:42px; padding:0 8px}
+  .name{font-size:1.3rem; font-weight:800; margin:10px 0 2px}
+  .price{font-size:1.1rem; color:var(--muted); font-weight:600}
+  .note{font-size:.85rem; color:var(--muted); margin-top:2px}
+  .qty{display:flex; align-items:center; justify-content:space-between; margin-top:10px; gap:4px}
+  .qbtn{width:clamp(44px,12.5vw,58px); height:clamp(44px,12.5vw,58px); flex:none; border-radius:50%; border:0; font:inherit; font-size:1.8rem;
+    font-weight:800; color:#fff; cursor:pointer; line-height:1; padding:0}
+  .qbtn.plus{background:var(--ok)} .qbtn.minus{background:var(--no)}
+  .qbtn:disabled{background:#ddd}
+  .count{font-size:1.8rem; font-weight:800; min-width:0; flex:1}
+
+  .bar{position:fixed; inset:auto 0 0 0; background:#fff; border-top:3px solid var(--line);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+  .bar .inner{max-width:640px; margin:0 auto; display:flex; gap:12px; align-items:center}
+  .total{font-size:1.2rem; font-weight:800; white-space:nowrap}
+  .bar .btn{margin:0; padding:16px}
+
+  /* summary rows */
+  .sumrow{display:flex; align-items:center; gap:12px; background:#fff; border-radius:18px;
+    border:3px solid var(--line); padding:10px 14px; margin-bottom:10px; font-size:1.25rem; font-weight:600}
+  .sumrow .e{font-size:2.4rem; width:56px; height:56px; display:flex; align-items:center; justify-content:center}
+  .sumrow .e img{width:56px; height:56px; border-radius:12px; object-fit:cover}
+  .sumrow .x{margin-inline-start:auto; font-weight:800}
+  .grand{text-align:center; font-size:1.5rem; font-weight:800; margin:16px 0 0}
+  .cash{text-align:center; color:var(--muted); font-size:1rem; margin-top:4px}
+
+  /* my orders */
+  .mine{margin-top:34px; border-top:3px dashed var(--line); padding-top:6px}
+  .mine h3{text-align:center; font-size:1.15rem; margin:14px 0 10px}
+  .order{background:#fff; border:3px solid var(--line); border-radius:18px; padding:12px 14px; margin-bottom:12px}
+  .order .who{font-weight:800}
+  .order .what{color:var(--muted); font-size:1rem; margin-top:2px}
+  .order.canceled{opacity:.6}
+  .order.canceled .who::after{content:" · בוטלה"; color:var(--no)}
+  .row2{display:flex; gap:10px}
+  .row2 .btn{flex:1}
+
+  .done{text-align:center; padding-top:16px}
+  .done .check{width:150px; height:150px; border-radius:50%; background:var(--ok); color:#fff;
+    font-size:6rem; line-height:150px; margin:10px auto 18px; animation:pop .4s ease-out}
+  @keyframes pop{0%{transform:scale(.3)}80%{transform:scale(1.1)}100%{transform:scale(1)}}
+  .hint{text-align:center; color:var(--muted); font-size:1rem; margin-top:14px}
+
+  .err{background:#fde8e6; color:#8a1f17; border-radius:16px; padding:14px; margin-top:14px;
+    text-align:center; font-weight:600}
+  .hello{text-align:center; font-size:1.1rem; color:var(--muted)}
+  .hello button{font:inherit; background:none; border:0; color:var(--brand-dark); font-weight:600; text-decoration:underline; cursor:pointer}
+  .install{margin:10px auto 0; font:inherit; font-size:.95rem; background:#fff;
+    color:var(--brand-dark); border:0; border-radius:999px; padding:8px 16px; font-weight:600; cursor:pointer}
+  .ios-tip{background:#fff; border:3px dashed var(--brand); border-radius:16px;
+    padding:12px; margin-top:20px; text-align:center; font-size:1rem}
+  .loading{text-align:center; padding:60px 0; font-size:1.2rem; color:var(--muted)}
+  .spinner{display:inline-block; width:22px; height:22px; border:4px solid currentColor; border-top-color:transparent;
+    border-radius:50%; animation:spin .8s linear infinite; vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion: reduce){*{animation:none!important; transition:none!important}}
+</style>
+</head>
+<body>
+<div class="demo" id="demoBar" hidden>מצב הדגמה · ההזמנות לא נשלחות לשום מקום</div>
+<header>
+  <h1>☕ בית קפה מישרים</h1>
+  <div class="when" id="when">טוען...</div>
+  <div><button class="install" id="installBtn" hidden>📲 התקנה בטלפון</button></div>
+</header>
+
+<main>
+  <div class="loading" id="loading"><span class="spinner"></span> טוען את התפריט...</div>
+  <div class="err" id="loadErr" hidden>
+    😕 אין חיבור לאינטרנט.<br>
+    <button class="btn small" id="retry">לנסות שוב</button>
+  </div>
+
+  <!-- 1: שם וכיתה -->
+  <section class="screen" id="s-name">
+    <h2>👋 מה השם שלך?</h2>
+    <input class="big-input" id="name" autocomplete="given-name" placeholder="השם שלי" maxlength="40">
+    <label class="lbl" for="klass">🏫 באיזו כיתה?</label>
+    <input class="big-input" id="klass" placeholder="הכיתה שלי" maxlength="20">
+    <button class="btn" id="toMenu">המשך ←</button>
+
+    <div class="mine" id="mine" hidden>
+      <h3>🧾 הזמנות ששלחתי</h3>
+      <div id="mineList"></div>
+    </div>
+
+    <div class="ios-tip" id="iosTip" hidden>📲 כדי שיהיה אייקון בטלפון:<br>לוחצים על כפתור השיתוף <b>⬆️</b> ואז על <b>"הוסף למסך הבית"</b></div>
+  </section>
+
+  <!-- 2: תפריט -->
+  <section class="screen" id="s-menu">
+    <h2>🍽️ מה תרצו להזמין?</h2>
+    <p class="hello" id="hello"></p>
+    <div class="grid" id="grid" style="margin-top:14px"></div>
+  </section>
+
+  <!-- 3: אישור -->
+  <section class="screen" id="s-confirm">
+    <h2>✅ זאת ההזמנה שלך?</h2>
+    <div id="summary"></div>
+    <div class="grand" id="grand"></div>
+    <div class="cash">משלמים במזומן בבית הקפה</div>
+    <button class="btn ok" id="send">כן! שלחו את ההזמנה</button>
+    <button class="btn ghost" id="back">✏️ רוצה לשנות</button>
+    <div class="err" id="sendErr" hidden></div>
+  </section>
+
+  <!-- 4: נשלח -->
+  <section class="screen" id="s-done">
+    <div class="done">
+      <div class="check">✓</div>
+      <h2 id="doneMsg">ההזמנה התקבלה!</h2>
+      <p style="font-size:1.15rem; margin:0" id="doneWhen"></p>
+      <button class="btn" id="again">סיימתי</button>
+      <p class="hint">התחרטתם? אפשר לבטל עד יום שלישי בשעה 8:00 בבוקר, במסך הראשון.</p>
+    </div>
+  </section>
+</main>
+
+<div class="bar" id="bar" hidden>
+  <div class="inner">
+    <div class="total" id="total">0 ₪</div>
+    <button class="btn ok" id="toConfirm" disabled>הזמנתי ←</button>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="mock-api.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = Util.esc;
+let MENU = [];
+let WIN = Util.orderWindow();
+const cart = {};
+const MAX_QTY = 99;
+
+/* ---------- ניווט ---------- */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.id === id));
+  $("bar").hidden = id !== "s-menu";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function say(text){
+  try{
+    if(!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "he-IL"; u.rate = 0.9;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+const buzz = () => { try{ navigator.vibrate && navigator.vibrate(30); }catch(e){} };
+
+function pic(m){ return m.image ? `<img src="${esc(m.image)}" alt="">` : esc(m.emoji || "🍽️"); }
+
+function renderWhen(){
+  $("when").textContent = `ליום שלישי ${Util.fmtDay(WIN.day)} · מזמינים עד 8:00`;
+}
+
+/* ---------- טעינת תפריט ---------- */
+async function loadMenu(){
+  $("loading").hidden = false; $("loadErr").hidden = true;
+  const cached = Util.ls.get("menu", null);
+  if(cached && cached.items) MENU = cached.items;
+  try{
+    const r = await api("getMenu", { v: cached && cached.v });
+    WIN = r.window || WIN;
+    if(!r.same){ MENU = r.items; Util.ls.set("menu", { v: r.v, items: r.items }); }
+  }catch(e){
+    if(!MENU.length){ $("loading").hidden = true; $("loadErr").hidden = false; return false; }
+  }
+  $("loading").hidden = true;
+  MENU.forEach(m => { if(!(m.id in cart)) cart[m.id] = 0; });
+  renderWhen(); renderMenu();
+  return true;
+}
+
+function renderMenu(){
+  $("grid").innerHTML = MENU.map(m => `
+    <div class="item" id="card-${esc(m.id)}">
+      <button class="pic" data-add="${esc(m.id)}" aria-label="להוסיף ${esc(m.name)}">${pic(m)}<span class="badge" hidden></span></button>
+      <div class="name">${esc(m.name)}</div>
+      <div class="price">${Number(m.price)} ₪</div>
+      ${m.note ? `<div class="note">${esc(m.note)}</div>` : ""}
+      <div class="qty">
+        <button class="qbtn plus" data-add="${esc(m.id)}" aria-label="עוד ${esc(m.name)}">+</button>
+        <span class="count" aria-live="polite">0</span>
+        <button class="qbtn minus" data-sub="${esc(m.id)}" aria-label="פחות ${esc(m.name)}">−</button>
+      </div>
+    </div>`).join("");
+  update();
+}
+
+const total = () => MENU.reduce((s, m) => s + (cart[m.id] || 0) * Number(m.price), 0);
+
+function update(){
+  MENU.forEach(m => {
+    const card = $("card-" + m.id); if(!card) return;
+    const q = cart[m.id] || 0;
+    card.querySelector(".count").textContent = q;
+    card.classList.toggle("picked", q > 0);
+    const b = card.querySelector(".badge"); b.hidden = q === 0; b.textContent = "×" + q;
+    card.querySelector(".minus").disabled = q === 0;
+    card.querySelector(".plus").disabled = q >= MAX_QTY;
+  });
+  $("total").textContent = "סה״כ: " + total() + " ₪";
+  $("toConfirm").disabled = total() === 0;
+}
+
+$("grid").addEventListener("click", e => {
+  const add = e.target.closest("[data-add]"), sub = e.target.closest("[data-sub]");
+  if(add){
+    const m = MENU.find(x => x.id === add.dataset.add);
+    if((cart[m.id] || 0) < MAX_QTY){ cart[m.id] = (cart[m.id] || 0) + 1; say(m.name); }
+  } else if(sub){
+    const m = MENU.find(x => x.id === sub.dataset.sub);
+    if(cart[m.id] > 0) cart[m.id]--;
+  } else return;
+  buzz(); update();
+});
+
+/* ---------- שלב 1 ---------- */
+$("toMenu").onclick = () => {
+  const n = $("name").value.trim(), k = $("klass").value.trim();
+  $("name").classList.toggle("bad", n.length < 2);
+  $("klass").classList.toggle("bad", !k);
+  if(n.length < 2){ $("name").focus(); say("כתבו את השם שלכם"); return; }
+  if(!k){ $("klass").focus(); say("כתבו את הכיתה שלכם"); return; }
+  Util.ls.set("me", { name: n, klass: k });
+  $("hello").innerHTML = `שלום <b>${esc(n)}</b>! לוחצים על התמונה כדי להוסיף · <button type="button" id="notMe">זה לא אני</button>`;
+  $("notMe").onclick = () => show("s-name");
+  show("s-menu");
+};
+["name","klass"].forEach(id => $(id).addEventListener("input", () => $(id).classList.remove("bad")));
+$("klass").addEventListener("keydown", e => { if(e.key === "Enter") $("toMenu").click(); });
+$("name").addEventListener("keydown", e => { if(e.key === "Enter") $("klass").focus(); });
+
+/* ---------- שלב 3 ---------- */
+$("toConfirm").onclick = () => {
+  const rows = MENU.filter(m => cart[m.id] > 0);
+  $("summary").innerHTML = rows.map(m => `
+    <div class="sumrow"><span class="e">${pic(m)}</span>
+      <span>${esc(m.name)}</span><span class="x">× ${cart[m.id]}</span></div>`).join("");
+  $("grand").textContent = "לתשלום: " + total() + " ₪";
+  $("sendErr").hidden = true;
+  show("s-confirm");
+};
+$("back").onclick = () => show("s-menu");
+
+$("send").onclick = async () => {
+  const btn = $("send");
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> שולח...';
+  $("sendErr").hidden = true;
+  const me = Util.ls.get("me", {});
+  const items = Object.fromEntries(Object.entries(cart).filter(([, q]) => q > 0));
+  try{
+    const r = await api("placeOrder", { name: me.name, klass: me.klass, items });
+    const mine = Util.ls.get("myOrders", []);
+    mine.unshift({ id: r.id, token: r.token, day: r.day, name: me.name, klass: me.klass,
+      text: Util.itemsText(items, MENU), total: r.total, status: "active" });
+    Util.ls.set("myOrders", mine.slice(0, 30));
+    WIN.day = r.day || WIN.day;
+    $("doneMsg").textContent = "תודה " + me.name + "! ההזמנה התקבלה";
+    $("doneWhen").textContent = "נתראה ביום שלישי " + Util.fmtDay(r.day) + " 😊";
+    say("תודה, ההזמנה התקבלה");
+    show("s-done");
+  }catch(e){
+    $("sendErr").textContent = e.code === "network"
+      ? "😕 ההזמנה לא נשלחה. בדקו שיש אינטרנט ונסו שוב."
+      : "😕 ההזמנה לא נשלחה: " + e.message;
+    $("sendErr").hidden = false;
+  }finally{
+    btn.disabled = false; btn.textContent = "כן! שלחו את ההזמנה";
+  }
+};
+
+$("again").onclick = () => {
+  Object.keys(cart).forEach(k => cart[k] = 0);
+  update(); renderMine(); show("s-name");
+};
+
+/* ---------- ההזמנות שלי + ביטול ---------- */
+function renderMine(){
+  const mine = Util.ls.get("myOrders", []).filter(o => o.day >= WIN.day);
+  $("mine").hidden = !mine.length;
+  $("mineList").innerHTML = mine.map(o => `
+    <div class="order ${o.status === "canceled" ? "canceled" : ""}" data-id="${esc(o.id)}">
+      <div class="who">${esc(o.name)} · ${esc(o.klass)} · יום שלישי ${Util.fmtDay(o.day)}</div>
+      <div class="what">${esc(o.text)} · ${Number(o.total)} ₪</div>
+      ${o.status === "active" ? `
+        <button class="btn small ghost" data-cancel>❌ לבטל את ההזמנה</button>
+        <div class="row2" data-confirm hidden>
+          <button class="btn small danger" data-yes>כן, לבטל</button>
+          <button class="btn small ghost" data-no>לא</button>
+        </div>
+        <div class="err" data-err hidden></div>` : ""}
+    </div>`).join("");
+}
+
+$("mineList").addEventListener("click", async e => {
+  const card = e.target.closest(".order"); if(!card) return;
+  const id = card.dataset.id;
+  if(e.target.closest("[data-cancel]")){
+    card.querySelector("[data-cancel]").hidden = true;
+    card.querySelector("[data-confirm]").hidden = false;
+    say("לבטל את ההזמנה?");
+  } else if(e.target.closest("[data-no]")){
+    card.querySelector("[data-cancel]").hidden = false;
+    card.querySelector("[data-confirm]").hidden = true;
+  } else if(e.target.closest("[data-yes]")){
+    const mine = Util.ls.get("myOrders", []);
+    const o = mine.find(x => x.id === id);
+    const yes = card.querySelector("[data-yes]");
+    yes.disabled = true; yes.innerHTML = '<span class="spinner"></span>';
+    try{
+      await api("cancelOrder", { id: o.id, token: o.token });
+      o.status = "canceled"; Util.ls.set("myOrders", mine);
+      say("ההזמנה בוטלה"); renderMine();
+    }catch(err){
+      const box = card.querySelector("[data-err]");
+      box.textContent = err.code === "network" ? "אין אינטרנט. נסו שוב." : err.message;
+      box.hidden = false; yes.disabled = false; yes.textContent = "כן, לבטל";
+    }
+  }
+});
+
+async function syncMine(){
+  let mine = Util.ls.get("myOrders", []).filter(o => o.day >= WIN.day);
+  Util.ls.set("myOrders", mine);
+  const open = mine.filter(o => o.status === "active");
+  if(!open.length) return;
+  try{
+    const r = await api("orderStatus", { orders: open.map(o => ({ id: o.id, token: o.token })) });
+    mine.forEach(o => { const s = r.statuses[o.id]; if(s === "canceled" || s === "missing") o.status = "canceled"; });
+    Util.ls.set("myOrders", mine); renderMine();
+  }catch(e){}
+}
+
+/* ---------- התקנה כאפליקציה ---------- */
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt = e; $("installBtn").hidden = false; });
+$("installBtn").onclick = async () => {
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt(); await deferredPrompt.userChoice;
+  deferredPrompt = null; $("installBtn").hidden = true;
+};
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+$("iosTip").hidden = !(isIOS && !standalone);
+if("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+
+/* ---------- התחלה ---------- */
+$("demoBar").hidden = !DEMO;
+$("retry").onclick = () => loadMenu().then(ok => ok && show("s-name"));
+const me = Util.ls.get("me", {});
+$("name").value = me.name || ""; $("klass").value = me.klass || "";
+renderWhen();
+loadMenu().then(ok => { if(ok){ renderMine(); show("s-name"); syncMine(); } });
+</script>
+</body>
+</html>
