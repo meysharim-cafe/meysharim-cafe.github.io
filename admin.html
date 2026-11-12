@@ -279,7 +279,7 @@ async function refresh(){
   $("refresh").innerHTML = '<span class="spinner"></span>';
   try{
     DATA = await api("adminData", { pw: PW, weeks: 20 });
-    if(!selDay) selDay = DATA.window.day;
+    if(!selDay) selDay = defaultDay();
     if(!menuDirty){ menuDraft = DATA.menu.map(m => ({ ...m })); }
     renderAll();
   }catch(err){
@@ -292,6 +292,19 @@ async function refresh(){
 }
 $("refresh").onclick = refresh;
 setInterval(() => { if(!$("appView").hidden && !$("tab-week").hidden && document.visibilityState === "visible") refresh(); }, 60000);
+
+// התאריך של היום לפי שעון ישראל
+function todayIL(){
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: Util.TZ, year: "numeric", month: "2-digit", day: "2-digit" })
+    .formatToParts(new Date()).map(x => [x.type, x.value]));
+  return `${p.year}-${p.month}-${p.day}`;
+}
+const isToday = d => d === todayIL() && d !== DATA.window.day;
+// ביום שלישי אחרי שעת הסגירה מציגים קודם את ההזמנות של היום
+function defaultDay(){
+  const t = todayIL();
+  return (t !== DATA.window.day && new Date(t + "T12:00:00Z").getUTCDay() === 2) ? t : DATA.window.day;
+}
 
 const menuAll = () => DATA ? DATA.menu : [];
 const active = o => o.status === "active";
@@ -345,8 +358,10 @@ function renderAll(){ renderWeek(); renderHistory(); renderMenuEditor(); }
 function renderWeek(){
   const up = DATA.window.day;
   const days = [up, ...pastDays()];
+  const t = defaultDay();
+  if(t !== up && !days.includes(t)) days.splice(1, 0, t);
   if(!days.includes(selDay)) selDay = up;
-  $("daySel").innerHTML = days.map(d => `<option value="${d}" ${d === selDay ? "selected" : ""}>יום שלישי ${Util.fmtDay(d)}${d === up ? " (הקרוב)" : ""}</option>`).join("");
+  $("daySel").innerHTML = days.map(d => `<option value="${d}" ${d === selDay ? "selected" : ""}>יום שלישי ${Util.fmtDay(d)}${d === up ? " (הזמנות פתוחות)" : isToday(d) ? " (היום)" : ""}</option>`).join("");
 
   const isUp = selDay === up;
   const orders = DATA.orders.filter(o => o.day === selDay);
@@ -358,9 +373,11 @@ function renderWeek(){
   const fcTotal = fc ? sum(fc.units) : null;
 
   $("weekTitle").textContent = "יום שלישי " + Util.fmtDay(selDay);
+  const today = isToday(selDay);
   $("weekPill").className = "pill " + (isUp ? "open" : "closed");
-  $("weekPill").textContent = isUp ? "ההזמנות פתוחות" : "הסתיים";
-  $("weekSub").textContent = isUp ? "אפשר להזמין עד יום שלישי ב-8:00 בבוקר" : "";
+  $("weekPill").textContent = isUp ? "ההזמנות פתוחות" : today ? "היום · ההזמנות נסגרו" : "הסתיים";
+  $("weekSub").textContent = isUp ? "אפשר להזמין עד יום שלישי ב-8:00 בבוקר"
+    : today ? `ההזמנות נסגרו ב-8:00. הזמנות חדשות נרשמות ליום שלישי ${Util.fmtDay(up)}.` : "";
 
   $("kpis").innerHTML = `
     <div class="kpi"><small>הזמנות</small><b class="num">${act.length}</b><div class="sub">${orders.length - act.length ? (orders.length - act.length) + " בוטלו" : "&nbsp;"}</div></div>
@@ -390,7 +407,7 @@ function renderWeek(){
 
 function renderOrders(){
   const q = $("search").value.trim();
-  const isUp = selDay === DATA.window.day;
+  const isUp = true; // הצוות יכול לבטל או לשחזר הזמנה בכל יום (למשל תלמיד שלא הגיע)
   let orders = DATA.orders.filter(o => o.day === selDay);
   if(q) orders = orders.filter(o => o.name.includes(q) || o.klass.includes(q));
   orders.sort((a, b) => (b.status === "active") - (a.status === "active") || a.klass.localeCompare(b.klass, "he") || a.name.localeCompare(b.name, "he"));
